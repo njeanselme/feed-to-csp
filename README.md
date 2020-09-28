@@ -20,7 +20,7 @@ Determine overlap and Build Venn diagram
 
 Build list of deduplicated IOCs and write to db
 
-*5 )push-to-csp.py
+* 5)push-to-csp.py
 
 downloads all Fortiguard_* named_lists from csp.infoblox.com
 removes entries from csp.infoblox.com that are not anymore in the list of new IOCs
