@@ -22,7 +22,7 @@ Build list of deduplicated IOCs and write to db
 
 * 5)push-to-csp.py
 
-downloads all Fortiguard_* named_lists from csp.infoblox.com
+downloads third party vendor named_lists from csp.infoblox.com
 removes entries from csp.infoblox.com that are not anymore in the list of new IOCs
 creates new named_lists if capacity requires it
 adds entries from the list of new IOCS to the named_lists
@@ -31,4 +31,4 @@ adds entries from the list of new IOCS to the named_lists
 
 ## Installation:
 
-Modify api keys and palo alto url in the config.yml file 
+Modify fortinet, palo alto, tide and csp api keys and palo alto url in the config.yml file 
