@@ -1,0 +1,14 @@
+csp_apikey: 1111111111111111111111111111111f
+
+tide_apikey: 111111111111111111111111111111111111111111111111111111111111111f
+tide_hosts_url: https://api.activetrust.net/api/data/threats/state/host?period=24h&data_format=ndjson
+tide_ips_url: https://api.activetrust.net/api/data/threats/state/IP?period=24h&data_format=ndjson
+
+fortiguard_apikey: 111111111111111111111111111111111111111111111111111111111111111f
+fortiguard_url: https://premiumapi.fortinet.com/v1/cti/feed/stix?cc=all
+
+paloalto_autofocus_apikey: 1111111f-111f-111f-111f-11111111111f
+paloalto_autofocus_url: https://autofocus.paloaltonetworks.com/api/v1.0/IOCFeed/1111111111111111111111111111111f/MalwareDNS
+
+age_IOCs_inactive_for_days: 30
+use_already_downloaded_IOC_files: False
