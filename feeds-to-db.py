@@ -9,6 +9,7 @@ import datetime
 import gzip
 import ipaddress
 import urllib
+import urllib.request
 import ssl
 import sqlite3
 #import cProfile #perf optimization only
@@ -33,6 +34,8 @@ fortiguard_url = cfg['fortiguard_url']
 
 paloalto_autofocus_apikey = cfg['paloalto_autofocus_apikey']
 paloalto_autofocus_url = cfg['paloalto_autofocus_url']
+
+cyber_threat_coalition_url = cfg['cyber_threat_coalition_url']
 
 use_already_downloaded_IOC_files = cfg['use_already_downloaded_IOC_files']
 
@@ -145,7 +148,7 @@ def getPaloAltoAutoFocusIOCs(use_already_downloaded_IOC_files, paloalto_autofocu
 	data ={}
 	filename = './paloalto_autofocus.csv'
 	
-	if True or not use_already_downloaded_IOC_files:
+	if not use_already_downloaded_IOC_files:
 		method='GET'
 		ssl._create_default_https_context = ssl._create_unverified_context
 		
@@ -233,17 +236,54 @@ def getFortiguardIOCs(use_already_downloaded_IOC_files, fortiguard_apikey):
 
 #########################################################	
 
+def getcyber_threat_coalition(use_already_downloaded_IOC_files):
+
+	filename = './cyber_threat_coalition.csv'
+
+	if not use_already_downloaded_IOC_files:
+		#method='GET'
+		ssl._create_default_https_context = ssl._create_unverified_context
+		
+		opener = urllib.request.build_opener()
+		opener.addheaders = opener.addheaders = [('User-agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36')]
+		urllib.request.install_opener(opener)
+		urllib.request.urlretrieve(cyber_threat_coalition_url, filename)
+	
+	file=open(filename, 'r')
+	
+	content = file.readlines()
+
+	line_number=0
+	ioc_number=0
+	for line in content:
+		line_number +=1
+		try:
+			if is_fqdn(line) or ipaddress.ip_address(line):
+				updateDB(line.strip(),'undefined','Cyber threat coalition')
+				ioc_number +=1
+		except:
+			pass
+			
+		if line_number % 10000 == 0:
+			logging.debug('Loaded {} Cyber threat coalition IOCs'.format(line_number))
+		
+	logging.info('Download ok, Cyber threat coalition IOCs: {}'.format(ioc_number))
+	file.close()
+
+#########################################################	
+
 conn = initSQLlite()
 
 getTIDEIOCs(use_already_downloaded_IOC_files, 'host', tide_hosts_url, tide_apikey)
 getTIDEIOCs(use_already_downloaded_IOC_files, 'ip', tide_ips_url, tide_apikey)
+
+getcyber_threat_coalition(use_already_downloaded_IOC_files)
 
 if fortiguard_apikey:
 	getFortiguardIOCs(use_already_downloaded_IOC_files, fortiguard_apikey)
 	
 if paloalto_autofocus_apikey:
 	getPaloAltoAutoFocusIOCs(use_already_downloaded_IOC_files, paloalto_autofocus_apikey)
-
 
 #cp = cProfile.Profile()
 #cp.enable()
