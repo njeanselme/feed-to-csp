@@ -13,7 +13,7 @@ with open("config.yml", "r") as ymlfile:
 
 #########################################################	
 
-logging.basicConfig(handlers = [logging.FileHandler('log/push-to-csp.log'), logging.StreamHandler()],level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(handlers = [logging.FileHandler('log/push-to-csp.log'), logging.StreamHandler()],level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 csp_apikey = cfg['csp_apikey']
 		
 #########################################################
@@ -57,7 +57,8 @@ def get_named_lists(named_list_prefix,headers):
 def update_to_csp(new_IOCs, csp_apikey, provider):
 		
 	headers= {'Authorization': 'Token {}'.format(csp_apikey)}
-	max_records_per_csp_list=10000
+	max_records_per_csp_list=50000
+	max_records_per_csp_update=10000
 	named_list_prefix='{} '.format(provider)
 	existing_IOCs= {}
 	IOCs_to_add = [{'description': 'do not remove', 'item': 'must_have_at_least_1_bad_domain.xyz'}]
@@ -124,24 +125,27 @@ def update_to_csp(new_IOCs, csp_apikey, provider):
 	
 	#Add to list ########################################
 	logging.debug('{:<20}  {:<50}'.format('-- Description --','-- IOC --'))
-	i=0
+	i=0 
 	for named_list in list_of_named_lists:
-		IOCs_to_add_to_list = []
 		j=0
 		while int(j + int(named_list['item_count'])) < max_records_per_csp_list and i < len(IOCs_to_add):
-			IOCs_to_add_to_list.append(IOCs_to_add[i])
-			logging.debug('{:<20}  {:<50}'.format(IOCs_to_add[i].get('description',''),IOCs_to_add[i].get('item','')))
-			i +=1
-			j +=1
-		json_to_add={}
-		json_to_add['items_described'] = IOCs_to_add_to_list
+			IOCs_to_add_to_list = []
+			k=0
+			while k < max_records_per_csp_update and int(j + int(named_list['item_count'])) < max_records_per_csp_list and i < len(IOCs_to_add):
+				IOCs_to_add_to_list.append(IOCs_to_add[i])
+				logging.debug('{:<20}  {:<50}'.format(IOCs_to_add[i].get('description',''),IOCs_to_add[i].get('item','')))
+				i +=1
+				j +=1
+				k +=1
+			json_to_add={}
+			json_to_add['items_described'] = IOCs_to_add_to_list
 		
-		logging.info("Adding {} entries in named_list {}, {}".format(len(IOCs_to_add_to_list),named_list['name'],named_list['id']))
-		response = requests.post('https://csp.infoblox.com/api/atcfw/v1/named_lists/{}/items'.format(named_list['id']), headers=headers, data=json.dumps(json_to_add, indent=4, sort_keys=True), verify=True, timeout=(300,300))
-		try:
-			response.raise_for_status()
-		except requests.exceptions.HTTPError as e:
-			return "Error: " + str(e)
+			logging.info("Adding {} entries in named_list {}, {}".format(len(IOCs_to_add_to_list),named_list['name'],named_list['id']))
+			response = requests.post('https://csp.infoblox.com/api/atcfw/v1/named_lists/{}/items'.format(named_list['id']), headers=headers, data=json.dumps(json_to_add, indent=4, sort_keys=True), verify=True, timeout=(300,300))
+			try:
+				response.raise_for_status()
+			except requests.exceptions.HTTPError as e:
+				return "Error: " + str(e)
 
 #########################################################		
 
