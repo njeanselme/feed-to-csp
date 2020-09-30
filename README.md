@@ -1,5 +1,5 @@
 # feed-to-csp
-BloxOne Threat Defense integration with Fortinet and Palo Alto domain names and IPs brings an even wider IOC coverage by threat intelligence unification. Third party IOCs are enforced at DNS level globally on all DNS even for roaming users who have not established their VPN
+BloxOne Threat Defense integration with Fortinet, Palo Alto and Cyber threat coalition domain names and IPs brings an even wider IOC coverage by threat intelligence unification. Third party IOCs are enforced at DNS level globally on all DNS even for roaming users who have not established their VPN
 
 
 ## 5 python scripts:
@@ -32,3 +32,4 @@ adds entries from the list of new IOCS to the named_lists
 ## Installation:
 
 Modify fortinet, palo alto, tide and csp api keys and palo alto url in the config.yml file 
+Modify the data you want to see in the Venn Diagram (up to 6 - 4 recommended for optimal readability) by commenting / uncommenting line 57-72
