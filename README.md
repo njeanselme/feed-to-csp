@@ -31,5 +31,6 @@ adds entries from the list of new IOCS to the named_lists
 
 ## Installation:
 
-Modify fortinet, palo alto, tide and csp api keys and palo alto url in the config.yml file 
+Modify fortinet, palo alto, tide and csp api keys and palo alto url in the config.yml file
+
 Modify the data you want to see in the Venn Diagram (up to 6 - 4 recommended for optimal readability) by commenting / uncommenting line 57-72
