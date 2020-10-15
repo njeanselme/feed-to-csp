@@ -11,8 +11,7 @@ with open("config.yml", "r") as ymlfile:
 
 #########################################################	
 
-logging.basicConfig(handlers = [logging.FileHandler('log/dedup-iocs-to-db.log'), logging.StreamHandler()],level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-#logging.basicConfig(handlers = [logging.FileHandler('log/dedup-iocs-to-db.log'), logging.StreamHandler()], level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(handlers = [logging.FileHandler('log/dedup-iocs-to-db.log'), logging.StreamHandler()],level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 		
 #########################################################
 	
@@ -67,13 +66,10 @@ def dedupIOCtoDB(providers,conn):
 	if 'Cyber threat coalition' in providers:
 		temporary_sets['Cyber threat coalition'] = ioc_sets['Cyber threat coalition']
 
-
 	temporary_sets['Infoblox'] = set()
 	for provider in set(ioc_sets).difference(set(temporary_sets)):
 		temporary_sets['Infoblox'].update(ioc_sets[provider])
-	
-	#petal_set = ((dataset_union & set.intersection(*included_sets)) - set.union(set(), *excluded_sets)
-	
+		
 	if 'Fortinet' in providers and 'Palo Alto' in providers:
 		deduplicated_sets['Fortinet'] = ioc_sets['Fortinet'].difference(temporary_sets['Infoblox'].union(ioc_sets['Palo Alto']))
 		deduplicated_sets['Palo Alto'] = ioc_sets['Palo Alto'].difference(temporary_sets['Infoblox'].union(ioc_sets['Fortinet']))
