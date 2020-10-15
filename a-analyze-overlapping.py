@@ -15,8 +15,7 @@ with open("config.yml", "r") as ymlfile:
 
 #########################################################	
 
-logging.basicConfig(handlers = [logging.FileHandler('log/analyze-db.log'), logging.StreamHandler()],level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-#logging.basicConfig(handlers = [logging.FileHandler('log/feed-to-infoblox-csp.log'), logging.StreamHandler()], level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(handlers = [logging.FileHandler('log/analyze-overlapping.log'), logging.StreamHandler()],level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 age_IOCs_inactive_for_days = cfg['age_IOCs_inactive_for_days']
 		
 #########################################################
@@ -53,7 +52,6 @@ def generate_report(providers,conn):
 	
 	#['AISCOMM' 'CrowdStrike' 'Cyber threat coalition' 'EmergingThreats' 'FarsightSecurity' 'Fortinet' 'IID' 'Palo Alto' 'SURBL']
 
-	
 	if 'Fortinet' in providers:
 		display_sets['Fortinet'] = ioc_sets['Fortinet']
 	if 'Palo Alto' in providers:
@@ -80,7 +78,7 @@ def generate_report(providers,conn):
 	#plt.title('Vendor IOCs overlap on active threats during last {}days'.format(age_IOCs_inactive_for_days))
 	plt.title('Vendor IOCs overlap on active threats')
 	plt.savefig('IOCs_overlap.png')
-
+	logging.info('Generated IOCs_overlap.png successfully')
 #########################################################			
 
 conn = initSQLlite()
