@@ -23,7 +23,7 @@ with open("config.yml", "r") as ymlfile:
 
 #########################################################	
 
-logging.basicConfig(handlers = [logging.FileHandler('log/feed-to-db.log'), logging.StreamHandler()],level=logging.DEBUG,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(handlers = [logging.FileHandler('log/feed-to-db.log'), logging.StreamHandler()],level=logging.INFO,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 tide_apikey = cfg['tide_apikey']
 tide_hosts_url = cfg['tide_hosts_url']
