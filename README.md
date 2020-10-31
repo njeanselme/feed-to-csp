@@ -54,3 +54,7 @@ Build timelines for IOCs confirmed by security vendors from NOD actual hits
 Modify fortinet, palo alto, tide and csp api keys and palo alto url in the config.yml file
 
 Modify the data you want to see in the Venn Diagram (up to 6 - 4 recommended for optimal readability) by commenting / uncommenting line 57-72
+
+## Automation
+Once every step is tested and working as expected, you can automate the full execution with:
+python3 1-feeds-to-db.py && pyton3 2-age-db.py && python3 3-dedup-iocs-to-db.py && python3 4-push-to-csp.py 
