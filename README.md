@@ -57,4 +57,5 @@ Modify the data you want to see in the Venn Diagram (up to 6 - 4 recommended for
 
 ## Automation
 Once every step is tested and working as expected, you can automate the full execution with:
+
 python3 1-feeds-to-db.py && pyton3 2-age-db.py && python3 3-dedup-iocs-to-db.py && python3 4-push-to-csp.py 
