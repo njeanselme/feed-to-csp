@@ -65,7 +65,7 @@ def initSQLlite():
 def updateDB(IOC,description,provider):
 	conn.execute('insert or ignore into iocs (id,ioc,provider,description,first_seen,last_seen) values ("'+IOC+provider+'","'+IOC+'","'+provider+'","'+description+'","'+now+'","'+now+'")')
 	conn.execute('update iocs set last_seen = "'+now+'" where id="'+IOC+provider+'"')
-	conn.commit()
+	#conn.commit()
 
 #########################################################
 
@@ -140,6 +140,7 @@ def getTIDEIOCs(use_already_downloaded_IOC_files, ioctype, url,tide_apikey):
 			
 		if line_number % 100000 == 0:
 			logging.debug('Loaded {} TIDE IOCs'.format(line_number))
+			conn.commit()
 	
 	logging.info('Download ok, {} TIDE IOCs: {}'.format(ioctype,line_number))
 	
@@ -171,7 +172,8 @@ def getPaloAltoAutoFocusIOCs(use_already_downloaded_IOC_files, paloalto_autofocu
 			
 		if line_number % 10000 == 0:
 			logging.debug('Loaded {} Palo Alto IOCs'.format(line_number))
-		
+			conn.commit()
+	
 	logging.info('Download ok, Palo Alto IOCs: {}'.format(ioc_number))
 	file.close()
 	
@@ -229,6 +231,7 @@ def getFortiguardIOCs(use_already_downloaded_IOC_files, fortiguard_apikey):
 		
 		if line_number % 10000 == 0:
 			logging.debug('Loaded {} Fortiguard IOCs'.format(line_number))
+			conn.commit()
 		
 
 	logging.info('Download ok, Fortinet IOCs: {}'.format(len(data)))
@@ -266,6 +269,7 @@ def getcyber_threat_coalition(use_already_downloaded_IOC_files):
 			
 		if line_number % 10000 == 0:
 			logging.debug('Loaded {} Cyber threat coalition IOCs'.format(line_number))
+			conn.commit()
 		
 	logging.info('Download ok, Cyber threat coalition IOCs: {}'.format(ioc_number))
 	file.close()
@@ -285,6 +289,7 @@ if fortiguard_apikey:
 if paloalto_autofocus_apikey:
 	getPaloAltoAutoFocusIOCs(use_already_downloaded_IOC_files, paloalto_autofocus_apikey)
 
+conn.commit()
 #cp = cProfile.Profile()
 #cp.enable()
 #cp.disable()
