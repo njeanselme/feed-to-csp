@@ -59,3 +59,7 @@ Modify the data you want to see in the Venn Diagram (up to 6 - 4 recommended for
 Once every step is tested and working as expected, you can automate the full execution with:
 
 python3 1-feeds-to-db.py && python3 2-age-db.py && python3 3-dedup-iocs-to-db.py && python3 4-push-to-csp.py 
+
+## Resources
+Note that for a fully loaded database for 30 of all supported vendors (SURBL, Crowdstrike, Infoblox, Farsight NOD, Fortinet, Palo Alto and Cyberthreat coalition), database takes 5GB and 3-dedup-iocs-to-db.py can take up to 48GB or memory. Tests have been done with 16GB of RAM and 32GB of swap under 30 minutes for 1-4 full process
+
