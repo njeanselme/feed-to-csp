@@ -29,7 +29,7 @@ def ageDB():
 		for row in rows:
 			logging.debug(row)
 		
-		cur.execute('delete * from iocs where last_seen <"'+deleteOlderThan+'"')
+		cur.execute('delete from iocs where last_seen <"'+deleteOlderThan+'"')
 		conn.commit()
 	logging.info('Aging database successfully - removed {}'.format(len(rows)))
 
