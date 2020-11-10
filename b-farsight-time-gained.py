@@ -94,8 +94,8 @@ def generate_report():
 	g.despine(bottom=True, left=True)
 
 	plt.title('Average time gain: {}hours'.format(average_time_gain))
-	plt.savefig('Farsight_timeline.png')
-	logging.info('Generated Farsight_timeline.png successfully')
+	plt.savefig('images/Farsight_timeline.png')
+	logging.info('Generated images/Farsight_timeline.png successfully')
 #########################################################			
 
 generate_report()
