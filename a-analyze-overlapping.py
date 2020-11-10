@@ -77,8 +77,8 @@ def generate_report(providers,conn):
 	v= venn(display_sets)
 	#plt.title('Vendor IOCs overlap on active threats during last {}days'.format(age_IOCs_inactive_for_days))
 	plt.title('Vendor IOCs overlap on active threats')
-	plt.savefig('IOCs_overlap.png')
-	logging.info('Generated IOCs_overlap.png successfully')
+	plt.savefig('images/IOCs_overlap.png')
+	logging.info('Generated images/IOCs_overlap.png successfully')
 #########################################################			
 
 conn = initSQLlite()
