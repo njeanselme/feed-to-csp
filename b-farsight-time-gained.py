@@ -30,25 +30,18 @@ def generate_report():
 	conn = sqlite3.connect('IOCs.db')
 	logging.info('Opened database successfully')
 
-	query = conn.execute('''SELECT a.ioc, a.provider, a.first_seen
-		FROM iocs a
-		JOIN (SELECT ioc, COUNT(*)
-		FROM iocs 
-		GROUP BY ioc
-		HAVING count(*) > 1 and provider='FarsightSecurity') b
-		ON a.ioc = b.ioc
-		ORDER BY a.ioc,a.first_seen''')
+	query = conn.execute('''SELECT ioc, provider, first_seen, description FROM iocs ORDER BY ioc''')
 	
 	cols = [column[0] for column in query.description]
 	df= pd.DataFrame.from_records(data = query.fetchall(), columns = cols)
 	
-	
 	# set farsight first seen as baseline - farsight_first_seen
 	df2= df.loc[df['provider'] == 'FarsightSecurity', ('ioc', 'first_seen')]
 	df2.rename(columns = {'first_seen':'farsight_first_seen'}, inplace = True)
-	df3 = pd.merge(df,df2,on='ioc',how='outer')
+	df3 = pd.merge(df,df2,on='ioc',how='inner')
 
-	df3.drop(df3[df3.provider == 'FarsightSecurity'].index, inplace=True) #to remove from graph
+	df3.drop(df3[df3.description == 'Policy_NewlyObservedDomains'].index, inplace=True) #to remove from graph
+	#df3.drop(df3[df3.provider == 'FarsightSecurity'].index, inplace=True) #to remove from graph
 	#df3.drop(df3[df3.provider == 'CrowdStrike'].index, inplace=True) #to remove from graph
 	df3.drop(df3[df3.provider == 'Cyber threat coalition'].index, inplace=True) #to remove from graph
 	#df3.drop(df3[df3.provider == 'SURBL'].index, inplace=True) #to remove from graph
@@ -57,10 +50,13 @@ def generate_report():
 	#df3.drop(df3[df3.provider == 'IID'].index, inplace=True) #to remove from graph
 	#df3.drop(df3[df3.provider == 'Fortinet'].index, inplace=True) #to remove from graph
 	
-	
 	df3['time_delta_human'] = pd.to_datetime(df3['first_seen']) - pd.to_datetime(df3['farsight_first_seen'])
-	df3['time_delta'] 	   = (pd.to_datetime(df3['first_seen']) - pd.to_datetime(df3['farsight_first_seen'])).dt.total_seconds()/3600
-	average_time_gain = round(df3['time_delta'].mean(),1)
+	df3['time_delta'] 	= (pd.to_datetime(df3['first_seen']) - pd.to_datetime(df3['farsight_first_seen'])).dt.total_seconds()/3600	
+	average_time_gain 	= round(df3['time_delta'].mean(),1)
+	
+	#clean graph
+	df3.drop(df3[df3.time_delta < -5].index, inplace=True)
+	df3.drop(df3[df3.time_delta > 300].index, inplace=True)	
 	
 	# Create the data
 	x = df3.time_delta
@@ -82,6 +78,7 @@ def generate_report():
 		ax.text(0, .2, label, fontweight="bold", color=color, ha="left", va="center", transform=ax.transAxes)
 	
 	g.map(label, "x")
+	#plt.xlim(-50, None)
 	#plt.ylabel("IOCs")
 	plt.xlabel("Delay to Farsight NOD in hours")
 
