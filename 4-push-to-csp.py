@@ -45,6 +45,8 @@ def getIOCs(conn,filter):
 def get_named_lists(named_list_prefix,headers):
 	list_of_named_lists=[]
 	response = requests.get('https://csp.infoblox.com/api/atcfw/v1/named_lists', headers=headers, verify=True, timeout=(300,300))
+	print(response.status_code)
+	print(response.text)
 	r_json = response.json()['results']
 	for named_list in r_json:
 		if re.match('^' + named_list_prefix + ' \d+', named_list['name']) or re.match('^' + named_list_prefix + '$', named_list['name']):
@@ -55,17 +57,17 @@ def get_named_lists(named_list_prefix,headers):
 #########################################################	
 
 def update_to_csp(new_IOCs, csp_apikey, provider):
-		
+
 	headers= {'Authorization': 'Token {}'.format(csp_apikey)}
 
 	#Get all named_lists ################################
 	list_of_named_lists = get_named_lists(provider,headers)
 
-	#Deduplicate to get the IOCs to add #################
-	IOCs_to_add  = [new_IOCs[k] for k in set(new_IOCs)]
-	
+	# Getting the domain names that are to be added.
+	new_domains = list(new_IOCs.keys())
+
 	#Create the List ####################################
-	name_list_names= False
+	name_list_names = False
 	for named_list in list_of_named_lists:
 		if named_list['name'] == provider:
 			name_list_names = True
@@ -73,7 +75,7 @@ def update_to_csp(new_IOCs, csp_apikey, provider):
 	if not name_list_names:
 		json_to_create = '{"name": "'+ provider+'", "type": "custom_list", "confidence_level": "MEDIUM", "threat_level": "MEDIUM", "items_described": [ { "description": "do not remove", "item": "must_have_at_least_1_bad_domain.xyz" }]}'
 		logging.info("Adding Named_list {}".format(provider))
-		response = requests.post('https://csp.infoblox.com/api/atcfw/v1/named_lists', headers=headers, data=json_to_create, verify=True, timeout=(300,300))
+		res = requests.post('https://csp.infoblox.com/api/atcfw/v1/named_lists', headers=headers, data=json_to_create, verify=True, timeout=(300,300))
 
 	#Update available Named Lists #######################	
 	list_of_named_lists = get_named_lists(provider,headers)
@@ -82,30 +84,69 @@ def update_to_csp(new_IOCs, csp_apikey, provider):
 		if named_list_in_list['name'] == provider:
 			named_list=named_list_in_list
 
-	#Add to list ########################################
+	# Extract items in list and perform pagination
+	count = named_list['item_count']
+	batch_of_read = 50000
+	batches = int(count/batch_of_read)+1
+	existing_domains = []
+	# Getting domains in batches of {batch_of_read} domains to reduce load
+	for i in range(0, batches):
+		logging.info(f"Getting batch {i} of {batch_of_read} domains.")
+		response = requests.get(
+			'https://csp.infoblox.com/api/atcfw/v1/named_lists/{}'.format(
+				named_list['id']), headers=headers, verify=True,
+			params={'_limit': batch_of_read, '_offset': i*batch_of_read},
+			timeout=(300, 300))
+		print(response)
+		existing_domains.extend(response.json()['results']['items'])
+
+	# Add to list ########################################
 	logging.debug('{:<20}  {:<50}'.format('-- Description --','-- IOC --'))
 
-	json_to_add={}
-	json_to_add['items_described'] = IOCs_to_add
+	# Filtering IOCs to be added
+	domains_to_add = set(new_domains) - set(existing_domains)
+	IOCs_to_add = []
+	for domain in domains_to_add:
+		IOCs_to_add.append(new_IOCs[domain])
+	json_to_add = {}
 
-	#Getting list
-	response = requests.get('https://csp.infoblox.com/api/atcfw/v1/named_lists/{}'.format(named_list['id']), headers=headers, verify=True, timeout=(300,300))
-	list_json= response.json()['results']
+	batch_of_write = 10000
+	# print(f'Items to be added: {IOCs_to_add}')
+	print(f'Number of Items to be added: {len(IOCs_to_add)}')
+	# We are adding sets of {batch_of_write} domains
+	if IOCs_to_add:
+		all_batches = create_batches(batch_of_write, IOCs_to_add)
+		for idx,batch in enumerate(all_batches):
+			print(f'Batch number: {idx}')
+			json_to_add['inserted_items_described'] = batch
+			logging.info("Adding {} entries in named_list {}, {}".format(
+				len(json_to_add['inserted_items_described']), named_list['name'],
+				named_list['id']))
+			response = requests.patch(
+				'https://csp.infoblox.com/api/atcfw/v1/named_lists/{}/items'.format(
+					named_list['id']), headers=headers,
+				data=json.dumps(json_to_add, indent=4, sort_keys=True), verify=True,
+				timeout=(300, 300))
+			print(response)
+			time.sleep(5)
+			# ToDo: update with a retry logic if the request fails.
+	else:
+		logging.info("New IOCs are same as existing ones.")
 
-	#Modifying list
-	list_json.pop('items')
-	list_json['items_described'] = json_to_add['items_described']
+#########################################################
 
-	#Put call
-	logging.info("Adding {} entries in named_list {}, {}".format(len(json_to_add['items_described']),named_list['name'],named_list['id']))
-	response = requests.put('https://csp.infoblox.com/api/atcfw/v1/named_lists/{}'.format(named_list['id']), headers=headers, data=json.dumps(list_json, indent=4, sort_keys=True), verify=True, timeout=(300,300))
-	print(response)
-	try:
-		response.raise_for_status()
-	except requests.exceptions.HTTPError as e:
-		return "Error: " + str(e)
+def create_batches(batch_of, total):
+	start = 0
+	num = int(len(total) / batch_of) + 1
+	whole_list = []
+	while num:
+		end = start + batch_of
+		whole_list.append(total[start:end])
+		start += batch_of
+		num -= 1
+	return whole_list
 
-#########################################################		
+
 
 def formatandimportIOCs(providers):
 	for provider in providers:
@@ -113,12 +154,15 @@ def formatandimportIOCs(providers):
 		dbfetch = getIOCs(conn, 'provider="{}"'.format(provider))
 		for entry in dbfetch:
 			new_IOCs[entry[0]]					= {}
+			# {'name_1': {'item': 'name_1','description': 'whatever'}, 'name_2':{}}
 			new_IOCs[entry[0]]['item']			= entry[0]
 			new_IOCs[entry[0]]['description']	= entry[1]
 		update_to_csp(new_IOCs, csp_apikey, provider)
 
 #########################################################		
 
-conn = initSQLlite()
-providers = getProviders(conn)
-formatandimportIOCs(providers)
+# conn = initSQLlite()
+# providers = getProviders(conn)
+# formatandimportIOCs(providers)
+update_to_csp(11,11,11)
+
