@@ -45,8 +45,6 @@ def getIOCs(conn,filter):
 def get_named_lists(named_list_prefix,headers):
 	list_of_named_lists=[]
 	response = requests.get('https://csp.infoblox.com/api/atcfw/v1/named_lists', headers=headers, verify=True, timeout=(300,300))
-	print(response.status_code)
-	print(response.text)
 	r_json = response.json()['results']
 	for named_list in r_json:
 		if re.match('^' + named_list_prefix + ' \d+', named_list['name']) or re.match('^' + named_list_prefix + '$', named_list['name']):
@@ -161,8 +159,7 @@ def formatandimportIOCs(providers):
 
 #########################################################		
 
-# conn = initSQLlite()
-# providers = getProviders(conn)
-# formatandimportIOCs(providers)
-update_to_csp(11,11,11)
+conn = initSQLlite()
+providers = getProviders(conn)
+formatandimportIOCs(providers)
 
