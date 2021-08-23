@@ -126,7 +126,7 @@ def update_to_csp(new_IOCs, csp_apikey, provider):
 				data=json.dumps(json_to_add, indent=4, sort_keys=True), verify=True,
 				timeout=(300, 300))
 			print(response)
-			time.sleep(5)
+			time.sleep(30)
 			# ToDo: update with a retry logic if the request fails.
 	else:
 		logging.info("New IOCs are same as existing ones.")
