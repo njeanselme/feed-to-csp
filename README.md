@@ -30,7 +30,7 @@ adds entries from the list of new IOCS to the named_lists
 Determine overlap and Build Venn diagram
 
 Example output:
-![alt text](https://github.com/njeanselme/feed-to-csp/blob/master/images/Vendor%20IOC%20overlap%201.png?raw=true)
+![Alt text](https://github.com/njeanselme/feed-to-csp/blob/master/images/Vendor%20IOC%20overlap%201.png?raw=true)
 
 
 * b-farsight-time-gained.py
@@ -38,14 +38,14 @@ Example output:
 Determine IOCs confirmed by security vendors and time gained by Farsight NOD
 
 Example output:
-![alt text](https://github.com/njeanselme/feed-to-csp/blob/master/images/Delay%20from%20newly%20observed%20domain%20to%20malicious%20reputation.png?raw=true)
+![Alt text](https://github.com/njeanselme/feed-to-csp/blob/master/images/Delay%20from%20newly%20observed%20domain%20to%20malicious%20reputation.png?raw=true)
 
 * c-notable-timelines.py
 
 Build timelines for IOCs confirmed by more than 3 security vendors to highlight time gained by Farsight NOD
 
 Example output:
-![alt text](https://github.com/njeanselme/feed-to-csp/blob/master/images/detection%20timeline.png?raw=true)
+![Alt text](https://github.com/njeanselme/feed-to-csp/blob/master/images/detection%20timeline.png?raw=true)
 
 
 ## Backtesting Farsight NOD hits from BloxOne Threat Defense
